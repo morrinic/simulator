@@ -1,0 +1,15 @@
+rm bank_results.txt
+rm store_results.txt
+
+clang++ -std=c++11 -c business_simulator/simulator/simulator.cpp -o business_simulator/simulator.o
+clang++ -std=c++11 -c business_simulator/simulator/business.cpp -o business_simulator/business.o
+clang++ -std=c++11 -c business_simulator/simulator/event.cpp -o business_simulator/event.o
+clang++ -lstdc++ -o simulator business_simulator/simulator.o business_simulator/business.o business_simulator/event.o
+
+for i in {0..10}; do
+	for j in {0..5}; do
+		k=$(bc <<< $j+0.5)
+        ./simulator $i $k 34534
+        ./simulator $i $j 34534
+	done
+done
