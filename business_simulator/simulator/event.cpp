@@ -9,18 +9,17 @@
 #include "event.hpp"
 #include <iostream>
 
-Event::Event(int business_arrival_time, int service_time_needed){
+Customer::Customer(int business_arrival_time, int service_time_needed){
     
     business_arrival_time_ = business_arrival_time;
     service_time_needed_ = service_time_needed;
-    line = 0;
     line_arrival_time_ = 0;
     left_time_ = 0;
     total_time_in_bank_ = 0;
     
 }
 
-bool Event::addToLine(int line_arrival_time){
+bool Customer::addToLine(int line_arrival_time){
     
     
     if(line_arrival_time == 200){
@@ -36,8 +35,8 @@ bool Event::addToLine(int line_arrival_time){
     left_time_ = line_arrival_time_ + service_time_needed_;
     
     //12 hours of events = 43200 seconds
-    if(left_time_ > 43200){
-        left_time_ = 43200;
+    if(left_time_ > total_seconds){
+        left_time_ = total_seconds;
     }
     
     total_time_in_bank_ = left_time_ - business_arrival_time_;
@@ -46,30 +45,26 @@ bool Event::addToLine(int line_arrival_time){
 }
 
 // Overloaded <
-bool Event::operator<(const Event& rhs) const {
+bool Customer::operator<(const Customer& rhs) const {
     return rhs.business_arrival_time_< business_arrival_time_;
 }
 
-int Event::getStoreArrivalTime(){
+int Customer::getStoreArrivalTime(){
     return business_arrival_time_;
 }
 
-int Event::getServiceTime(){
+int Customer::getServiceTime(){
     return service_time_needed_;
 }
 
-int Event::getLine(){
-    return line;
-}
-
-int Event::getLineArrivalTime(){
+int Customer::getLineArrivalTime(){
     return line_arrival_time_;
 }
 
-int Event::getLeftTime(){
+int Customer::getLeftTime(){
     return left_time_;
 }
 
-int Event::getTotalTime(){
+int Customer::getTotalTime(){
     return total_time_in_bank_;
 }

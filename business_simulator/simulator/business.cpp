@@ -16,7 +16,7 @@
 #include <fstream>
 
 
-static bool sort_using_less_than(Event u, Event v)
+static bool sort_using_less_than(Customer u, Customer v)
 {
     return u.getTotalTime() < v.getTotalTime();
 }
@@ -32,7 +32,7 @@ void Business::storeVariables(int lines, double arrival_time, double max_service
 void Business::populateEvents(){
 
     //12 hours of events = 43200 seconds
-    for(int time = 0; time < 43200; time++){
+    for(int time = 0; time < total_seconds; time++){
 
         bool customer = (rand() / (double) RAND_MAX) < (arrival_time_ / 60);
 
@@ -45,22 +45,22 @@ void Business::populateEvents(){
             int service_time = rand() % seconds + 1;
             
             //Add event to queue
-            Event e = *new Event(time, service_time);
-            arrival_events_queue.push(e);
+            Customer e = *new Customer(time, service_time);
+            arrival.push(e);
             
         }
     }
     
 }
 
-int Business::findNextBankServicer(const std::vector<std::priority_queue<Event>>& servicers){
+int Business::findNextBankServicer(const std::vector<std::priority_queue<Customer>>& servicers){
     
     //If employee 1 is not helping someone
     if(servicers.at(0).empty()){
         return 0;
     }
     
-    Event first_servicer = servicers.at(0).top();
+    Customer first_servicer = servicers.at(0).top();
     int lowest_servicer = 0;
     int lowest_time = first_servicer.getLeftTime();
     for(int i = 1; i < servicers.size(); i++){
@@ -69,7 +69,7 @@ int Business::findNextBankServicer(const std::vector<std::priority_queue<Event>>
             return i;
         }
         
-        Event next_servicer = servicers.at(i).top();
+        Customer next_servicer = servicers.at(i).top();
         int old_time = next_servicer.getLeftTime();
         if(old_time < lowest_time){
             lowest_time = old_time;
@@ -81,7 +81,7 @@ int Business::findNextBankServicer(const std::vector<std::priority_queue<Event>>
     return lowest_servicer;
 }
 
-int Business::findNextStoreServicer(const std::vector<std::vector<Event>>& servicers){
+int Business::findNextStoreServicer(const std::vector<std::vector<Customer>>& servicers){
     
     //If employee 1 is not helping someone
     if(servicers.at(0).empty()){
@@ -89,7 +89,7 @@ int Business::findNextStoreServicer(const std::vector<std::vector<Event>>& servi
     }
     
     long old_size = servicers.at(0).size() - 1;
-    Event last_in_smallest_line = servicers.at(0).at(old_size);
+    Customer last_in_smallest_line = servicers.at(0).at(old_size);
     int smallest_line = 0;
     for(int i = 1; i < lines_; i++){
         
@@ -98,7 +98,7 @@ int Business::findNextStoreServicer(const std::vector<std::vector<Event>>& servi
         }
         
         long current_line_size = servicers.at(i).size()-1;
-        Event last_in_current_line = servicers.at(i).at(current_line_size);
+        Customer last_in_current_line = servicers.at(i).at(current_line_size);
         if(last_in_current_line.getLeftTime() < last_in_smallest_line.getLeftTime()){
             smallest_line = i;
             last_in_smallest_line = last_in_current_line;
@@ -113,18 +113,18 @@ int Business::findNextStoreServicer(const std::vector<std::vector<Event>>& servi
 void Business::runBank(){
 
     //Make servicers
-    std::vector<std::priority_queue<Event>> servicers;
+    std::vector<std::priority_queue<Customer>> servicers;
     for(int i = 0; i < employees_; i++){
-        std::priority_queue<Event> servicer;
+        std::priority_queue<Customer> servicer;
         servicers.push_back(servicer);
     }
     
     //Add people to servicer queue
-    long customers = arrival_events_queue.size();
+    long customers = arrival.size();
     for(int i = 0; i < customers; i++){
 
-        Event event = arrival_events_queue.top();
-        arrival_events_queue.pop();
+        Customer event = arrival.top();
+        arrival.pop();
         
         int next_servicer = findNextBankServicer(servicers);
         
@@ -139,7 +139,7 @@ void Business::runBank(){
         } else {
             
             //Add to line details to event
-            Event old = servicers.at(next_servicer).top();
+            Customer old = servicers.at(next_servicer).top();
             if(event.addToLine(old.getLeftTime())){
 
                 //Remove old event from line
@@ -159,7 +159,7 @@ void Business::runBank(){
     //Add last people in line to results
     for(int i = 0; i < servicers.size(); i++){
         if(!servicers.at(i).empty()){
-            Event event = servicers.at(i).top();
+            Customer event = servicers.at(i).top();
             results.push_back(event);
         }
     }
@@ -169,18 +169,18 @@ void Business::runBank(){
 void Business::runStore(){
 
     //Make servicers
-    std::vector<std::vector<Event>> servicers;
+    std::vector<std::vector<Customer>> servicers;
     for(int i = 0; i < lines_; i++){
-        std::vector<Event> line;
+        std::vector<Customer> line;
         servicers.push_back(line);
     }
     
     //Add people to servicer queue
-    long customers = arrival_events_queue.size();
+    long customers = arrival.size();
     for(int i = 0; i < customers; i++){
         
-        Event event = arrival_events_queue.top();
-        arrival_events_queue.pop();
+        Customer event = arrival.top();
+        arrival.pop();
 
         int next_servicer = findNextStoreServicer(servicers);
         
@@ -196,7 +196,7 @@ void Business::runStore(){
             
             //Add to line details to event
             long size = servicers.at(next_servicer).size()-1;
-            Event old = servicers.at(next_servicer).at(size);
+            Customer old = servicers.at(next_servicer).at(size);
             if(event.addToLine(old.getLeftTime())){
                 
                 //Add new event to line
@@ -215,7 +215,7 @@ void Business::runStore(){
     for(int i = 0; i < servicers.size(); i++){
         if(servicers.at(i).size() != 0){
             long size = servicers.at(i).size();
-            Event event = servicers.at(i).at(size-1);
+            Customer event = servicers.at(i).at(size-1);
             results.push_back(event);
         }
         
