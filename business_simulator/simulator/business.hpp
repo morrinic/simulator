@@ -23,23 +23,26 @@ private:
     double arrival_time_;
     double max_service_time_;
     int seed_;
-    std::priority_queue<Event> arrival_events_queue;
-    std::priority_queue<Event> left_events_queue;
-    std::vector<Event> results;
+    std::priority_queue<Customer> arrival;
+    std::priority_queue<Customer> departure;
+    std::vector<Customer> results;
     
     void storeVariables(int lines, double arrival_time, double max_service_time, int seed);
     void populateEvents();
     void runEvents();
     void runBank();
     void runStore();
-    int findNextBankServicer(const std::vector<std::priority_queue<Event>>& servicers);
-    int findNextStoreServicer(const std::vector<std::vector<Event>>& servicers);
+    int findNextBankServicer(const std::vector<std::priority_queue<Customer>>& servicers);
+    int findNextStoreServicer(const std::vector<std::vector<Customer>>& servicers);
     double findResultsAverage();
+    //This function divides and prints the data into percentiles
     void analyzeResults();
+    //Makes the information available in a text file for graphing purposes
     void updateFileData();
     
 public:
     
+    //If lines == 6 then the store simulation is run, otherwise bank simulator is run
     void runSimulation(int lines, double arrival_time, double max_service_time, int seed);
 
 };
